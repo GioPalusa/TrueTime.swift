@@ -24,7 +24,7 @@ final class NTPIntegrationSpec: QuickSpec {
 private extension NTPIntegrationSpec {
     func testReferenceTimeOutliers() {
         let clients = (0..<100).map { _ in TrueTimeClient() }
-        waitUntil(timeout: 60) { done in
+		waitUntil(timeout: DispatchTimeInterval.seconds(60)) { done in
             var results: [ReferenceTimeResult?] = Array(repeating: nil, count: clients.count)
             let start = NSDate()
             let finish = {
@@ -58,12 +58,12 @@ private extension NTPIntegrationSpec {
 
             for (idx, client) in clients.enumerated() {
                 client.start(pool: ["time.apple.com"])
-                client.fetchIfNeeded { result in
-                    results[idx] = result
-                    if !results.contains(where: { $0 == nil }) {
-                        finish()
-                    }
-                }
+				client.fetchIfNeeded(completion:  { result in
+					results[idx] = result
+					if !results.contains(where: { $0 == nil }) {
+						finish()
+					}
+				})
             }
         }
     }
